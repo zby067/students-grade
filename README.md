@@ -17,11 +17,19 @@
 3. 启动应用：`python app.py`
 
 student-grade-system/
+
 ├── app.py # 主应用文件
+
 ├── init_db.py # 数据库初始化
+
 ├── requirements.txt # 依赖列表
+
 ├── templates/ # 模板文件
+
 │ ├── login.html
+
 │ ├── student.html
+
 │ └── teacher.html
+
 └── README.md
