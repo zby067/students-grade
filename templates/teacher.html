@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>教师管理系统</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial; margin: 0; padding: 0; }
+        .header { background: #007bff; color: white; padding: 15px 20px; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .tabs { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; cursor: pointer; border: 1px solid transparent; }
+        .tab.active { border: 1px solid #ddd; border-bottom: 1px solid white; border-radius: 4px 4px 0 0; background: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .alert { padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .row { display: flex; margin: 0 -10px; }
+        .col { flex: 1; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>教师管理系统</h1>
+        <div>欢迎，{{ user.name }} (教师) 
+            <a href="/logout" class="btn" style="float: right; background: #dc3545;">退出登录</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('insert')">插入成绩</div>
+            <div class="tab" onclick="showTab('upload')">批量导入</div>
+            <div class="tab" onclick="showTab('manage')">成绩管理</div>
+            <div class="tab" onclick="showTab('settings')">查询设置</div>
+        </div>
+
+        <!-- 插入成绩标签页 -->
+        <div id="insert" class="tab-content active">
+            <div class="card">
+                <h3>插入单个学生成绩</h3>
+                <form id="insertForm">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>选择学生</label>
+                                <select name="student_id" required>
+                                    <option value="">请选择学生</option>
+                                    {% for student in students %}
+                                    <option value="{{ student.student_id }}">{{ student.student_id }} - {{ student.name }} - {{ student.class }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>课程名称</label>
+                                <input type="text" name="course_name" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>成绩</label>
+                                <input type="number" name="score" step="0.1" min="0" max="100" required>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>学期</label>
+                                <input type="text" name="semester" value="2024-春季" required>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>学年</label>
+                                <input type="text" name="academic_year" value="2023-2024" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">插入成绩</button>
+                </form>
+                <div id="insertResult"></div>
+            </div>
+        </div>
+
+        <!-- 批量导入标签页 -->
+        <div id="upload" class="tab-content">
+            <div class="card">
+                <h3>批量导入成绩</h3>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>选择Excel文件</label>
+                        <input type="file" name="file" accept=".xlsx,.xls,.csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">上传并导入</button>
+                </form>
+
+                <div style="margin-top: 20px;">
+                    <h4>文件格式要求:</h4>
+                    <p>必须包含以下列: <strong>学号, 课程名称, 成绩, 学期, 学年</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>学号</th>
+                                <th>课程名称</th>
+                                <th>成绩</th>
+                                <th>学期</th>
+                                <th>学年</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024001</td>
+                                <td>Python程序设计</td>
+                                <td>85.5</td>
+                                <td>2024-春季</td>
+                                <td>2023-2024</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="uploadResult"></div>
+            </div>
+        </div>
+
+        <!-- 成绩管理标签页 -->
+        <div id="manage" class="tab-content">
+            <div class="card">
+                <h3>所有学生成绩</h3>
+                {% if grades %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>学号</th>
+                            <th>姓名</th>
+                            <th>班级</th>
+                            <th>课程名称</th>
+                            <th>成绩</th>
+                            <th>学期</th>
+                            <th>学年</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grade in grades %}
+                        <tr>
+                            <td>{{ grade.student_id }}</td>
+                            <td>{{ grade.student_name }}</td>
+                            <td>{{ grade.class }}</td>
+                            <td>{{ grade.course_name }}</td>
+                            <td>{{ grade.score }}</td>
+                            <td>{{ grade.semester }}</td>
+                            <td>{{ grade.academic_year }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="alert alert-info">暂无成绩记录</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 查询设置标签页 -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <h3>设置成绩查询时间段</h3>
+                {% if period %}
+                <div class="alert alert-info">
+                    <strong>当前查询时间段:</strong><br>
+                    开始: {{ period.start_date }}<br>
+                    结束: {{ period.end_date }}
+                </div>
+                {% endif %}
+                
+                <form id="periodForm">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>开始时间</label>
+                                <input type="datetime-local" name="start_date" required>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label>结束时间</label>
+                                <input type="datetime-local" name="end_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">设置时间段</button>
+                </form>
+                <div id="periodResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // 隐藏所有标签页
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // 显示选中的标签页
+            document.getElementById(tabName).classList.add('active');
+            
+            // 更新标签状态
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // 插入成绩表单
+        document.getElementById('insertForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/insert_grade', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('insertResult');
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+                    this.reset();
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('insertResult').innerHTML = `<div class="alert alert-danger">网络错误: ${error.message}</div>`;
+            }
+        });
+
+        // 文件上传表单
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/api/upload_grades', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('uploadResult');
+                
+                if (result.success) {
+                    let message = `<div class="alert alert-success">${result.message}</div>`;
+                    if (result.errors && result.errors.length > 0) {
+                        message += `<div class="alert alert-danger"><strong>错误:</strong><br>${result.errors.join('<br>')}</div>`;
+                    }
+                    resultDiv.innerHTML = message;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('uploadResult').innerHTML = `<div class="alert alert-danger">网络错误: ${error.message}</div>`;
+            }
+        });
+
+        // 时间段设置表单
+        document.getElementById('periodForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/api/set_period', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('periodResult');
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `<div class="alert alert-success">${result.message}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-danger">${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('periodResult').innerHTML = `<div class="alert alert-danger">网络错误: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

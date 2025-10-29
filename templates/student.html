@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>学生成绩查询</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial; margin: 0; padding: 0; }
+        .header { background: #28a745; color: white; padding: 15px 20px; }
+        .container { padding: 20px; max-width: 1000px; margin: 0 auto; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .alert { padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .alert-warning { background: #fff3cd; border: 1px solid #ffeaa7; }
+        .alert-info { background: #d1ecf1; border: 1px solid #bee5eb; }
+        .btn { padding: 8px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>学生成绩查询系统</h1>
+        <div>欢迎，{{ student.name }} (学生) 
+            <a href="/logout" class="btn" style="float: right; background: #dc3545;">退出登录</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h3>个人信息</h3>
+            <p><strong>学号:</strong> {{ student.student_id }}</p>
+            <p><strong>姓名:</strong> {{ student.name }}</p>
+            <p><strong>班级:</strong> {{ student.class }}</p>
+        </div>
+
+        <div class="card">
+            <h3>成绩查询</h3>
+            
+            {% if not can_query %}
+            <div class="alert alert-warning">
+                当前不在成绩查询时间段内，无法查看成绩。
+                {% if period_info %}
+                <br>查询时间段: {{ period_info }}
+                {% endif %}
+            </div>
+            {% elif grades %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>课程名称</th>
+                        <th>成绩</th>
+                        <th>学期</th>
+                        <th>学年</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in grades %}
+                    <tr>
+                        <td>{{ grade.course_name }}</td>
+                        <td>{{ grade.score }}</td>
+                        <td>{{ grade.semester }}</td>
+                        <td>{{ grade.academic_year }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-info">暂无成绩记录</div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
